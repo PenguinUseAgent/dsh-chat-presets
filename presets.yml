@@ -1,0 +1,77 @@
+# 纯对话 Agent 预设（DeepSeek Harness，Web profile）
+#
+# 这是一个 Loader「条目列表」（entry list），由 profile 补丁里的 cordis:include
+# 行加载，不需要安装成 npm 包。行内相对路径（如 ./no-tools.js）以本文件所在
+# 目录为基准，所以整个仓库可以 clone 到任意位置。
+#
+# 两个预设结构相同：persona（人设即完整系统提示）+ no-tools（屏蔽宿主机继承来的
+# 工具）+ compaction（长对话自动压缩，本身不是工具）。
+
+# ── 纯对话 ───────────────────────────────────────────────────────────────────
+- id: preset-chat
+  name: '@deepseek-ai/dsh-agent-preset'
+  config:
+    id: chat
+    name: 纯对话
+    description: 只进行文字对话，不挂载任何工具。
+    order: 5
+    plugins:
+      # 人设就是完整系统提示：没有工具说明、没有编码 agent 框架、没有运行时上下文。
+      - id: persona
+        name: '@deepseek-ai/dsh-persona'
+        config:
+          prefix: |-
+            你是一个纯对话助手：你能做的只有用文字和用户交流。
+
+            工作方式：
+            - 你没有任何工具，也不描述、不假装、不尝试调用工具。遇到需要读写文件、执行命令、联网查资料或生成文件的任务，直接说明你做不到，并建议用户换用带工具的预设。
+            - 不编造事实、链接、数据或引用；不确定就明确说不确定。
+            - 回答自然、清楚、长度适度，不必为了结构而堆砌标题和列表。
+            - 用用户正在使用的语言回答；用户用中文就用中文。
+          complete: true
+          includeRuntimeContext: false
+      # 宿主层注册的工具会被每个会话继承，这一行把它们全部拒绝掉。
+      - id: chat-no-tools
+        name: './no-tools.js'
+      # 长对话用：接近上下文上限时自动压缩历史，本身不是工具。
+      - id: compaction
+        name: cordis:group
+        group: true
+        isolate:
+          compaction: true
+        config:
+          - id: compaction-basic
+            name: '@deepseek-ai/dsh-compaction-basic'
+
+# ── 纯对话 2 ─────────────────────────────────────────────────────────────────
+- id: preset-chat2
+  name: '@deepseek-ai/dsh-agent-preset'
+  config:
+    id: chat2
+    name: 纯对话 2
+    description: 第二个纯对话预设，风格更简洁，便于对比与自定义。
+    order: 6
+    plugins:
+      - id: persona
+        name: '@deepseek-ai/dsh-persona'
+        config:
+          prefix: |-
+            你是一个纯对话助手，风格简洁直白。
+
+            工作方式：
+            - 你没有任何工具，也不描述、不假装、不尝试调用工具。需要读写文件、执行命令、联网查资料或生成文件时，直接说明你做不到，并建议用户换用带工具的预设。
+            - 先给结论，再给必要解释；一句话能说清就不写一段。
+            - 不编造事实、链接、数据或引用；不确定就明确说不确定。
+            - 用用户正在使用的语言回答。
+          complete: true
+          includeRuntimeContext: false
+      - id: chat-no-tools
+        name: './no-tools.js'
+      - id: compaction
+        name: cordis:group
+        group: true
+        isolate:
+          compaction: true
+        config:
+          - id: compaction-basic
+            name: '@deepseek-ai/dsh-compaction-basic'

@@ -1,0 +1,7 @@
+{
+  "name": "dsh-chat-presets",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Conversation-only agent presets for DeepSeek Harness: chat with no tools."
+}
